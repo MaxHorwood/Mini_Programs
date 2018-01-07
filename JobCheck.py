@@ -2,8 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 
 # Words that I want to be searched for
-# WANTED_WORDS = ["computer", "warehouse", "leaflet", "leafleting", "student", "summer", "p/t", "part time"]
-WANTED_WORDS = ["IT", "part", "time"]
+WANTED_WORDS = ["computer", "student", "summer", "part time"]
+
 # Used for the start of the HTML, will insert job in the main program
 HTML_START = """
 <head>
@@ -43,14 +43,16 @@ HTML_END = """
 
 # Looks for a particular word in a String
 def lookForWord(desc, fileName):
+    tempText = ""
     for _, item in enumerate(WANTED_WORDS):
         if item in desc:
-            # Replace the given word wrapped <b> tags
             # Adding bold tags to just the keyword in the sentence
-            textToWrite = desc.replace(item, '<b class=\"keyword\">'+item+'</b>')
-            # Now wrap the whole sentance (job) in a span, so can be styled sepratly
-            textToWrite = "<span class=\"job\">"+textToWrite+"</span>\n"
-            fileWrite(fileName+".html", textToWrite)
+            tempText = desc.replace(item, '<b class=\"keyword\">'+item+'</b>')
+    # Don't want empty span tags...
+    if (tempText != ""):
+        # Now wrap the whole sentence (job) in a span, so can be styled sepratly
+        tempText = "<span class=\"job\">"+tempText+"</span>\n"
+    return tempText
 
 # Appends a given file
 def fileWrite(file_name, text):
@@ -83,11 +85,15 @@ def main():
     # Looks for ul tags with certain attrs
     table = soup.find('div', attrs={'class': 'row aboard-free'})
 
+
+    textToWrite = ""
     # Find all job descriptions
     for jobDesc in table.findAll('span', attrs={'class': 'a-text'}):
-        lookForWord(jobDesc.text, fileName) # Looking for defined keywords
-
+        textToWrite = textToWrite + lookForWord(jobDesc.text, fileName) # Looking for defined keywords
+    # If Nothing is found
+    if (textToWrite == ""):
+        textToWrite = "<span class=\"job\">Nothing Found!</span>"
     # FINISH GENERATING HTML (add closing body tag)
-    fileWrite(fileName+".html", HTML_END)
+    fileWrite(fileName+".html", textToWrite+HTML_END)
 
 main()
