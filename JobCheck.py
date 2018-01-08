@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import requests
+import requests, os
 
 # Words that I want to be searched for
 WANTED_WORDS = ["computer", "student", "summer", "part time"]
@@ -85,7 +85,6 @@ def main():
     # Looks for ul tags with certain attrs
     table = soup.find('div', attrs={'class': 'row aboard-free'})
 
-
     textToWrite = ""
     # Find all job descriptions
     for jobDesc in table.findAll('span', attrs={'class': 'a-text'}):
@@ -95,5 +94,6 @@ def main():
         textToWrite = "<span class=\"job\">Nothing Found!</span>"
     # FINISH GENERATING HTML (add closing body tag)
     fileWrite(fileName+".html", textToWrite+HTML_END)
-
+    # Auto open file
+    os.system('start ' + fileName + '.html')
 main()
